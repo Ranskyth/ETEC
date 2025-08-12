@@ -2,43 +2,71 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
+import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../components/loading";
+import Cookies from "js-cookie";
 
 export const Home = () => {
+  
   const { register, handleSubmit } = useForm();
   const [alunos, setAlunos] = useState<
     [{ id: number; nome: string; email: string; curso: string }]
-  >([{ id: 0, nome: "", email: "", curso: "" }]);
+  >([]);
+
+  const token = Cookies.get("auth_user")
+
+  if(!token){
+    return(<h1>Usuario não Autenticado</h1>)
+  }
 
   const Submit = async (data: any) => {
-    fetch(`${import.meta.env.VITE_SUPABASE_URL}/alunos`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_API_KEY}`,
-        apikey: `${import.meta.env.VITE_SUPABASE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
+    try{
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/alunos`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: `${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      toast("Aluno Cadastrado")
+    }catch(err){
+      console.log("error in", err)
+    }
   };
 
+  const handleDelete = async (id: number) => {
+    toast("Deletando...")
+    await fetch(`${import.meta.env.VITE_SUPABASE_URL}/alunos?id=eq.${id}`, {
+        method: "DELETE",
+          headers:{apikey: `${token}`, Authorization:`Bearer ${token}`}
+      });
+      toast("Deletado")
+  }
+  
+  const handleEditar = (id:number) => {
+    
+  }
   useEffect(() => {
     (async () => {
       const data = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/alunos?select=*`,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_API_KEY}`,
-            apikey: `${import.meta.env.VITE_SUPABASE_API_KEY}`,
+            Authorization: `Bearer ${token}`,
+            apikey: `${token}`,
           },
         }
       );
       const datajson = await data.json();
       setAlunos(datajson);
     })();
-  }, []);
-  console.log(alunos);
+  }, [handleDelete]);
+
   return (
-    <div className="bg-[#0d1016] h-screen px-16 py-5">
+    <div className="bg-[#fff] h-screen px-16 py-5">
+      <ToastContainer/>
       <ol className="flex items-center w-full mb-4 sm:mb-5">
         <li className="flex w-full items-center text-blue-600 dark:text-blue-500 after:content-[''] after:w-full after:h-1 after:border-b after:border-blue-100 after:border-4 after:inline-block dark:after:border-blue-800">
           <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full lg:h-12 lg:w-12 dark:bg-blue-800 shrink-0">
@@ -81,6 +109,7 @@ export const Home = () => {
           </div>
         </li>
       </ol>
+   
       <form onSubmit={handleSubmit(Submit)} className="mb-12">
         <h3 className="mb-4 text-lg font-medium leading-none text-gray-900 dark:text-white">
           Invoice details
@@ -154,15 +183,15 @@ export const Home = () => {
               <tr className="bg-[#0e1527]">
                 <th
                   scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                  className="px-6 py-4 font-medium text-[#fff]"
                 >
                   {alunos.nome}
                 </th>
                 <td className="px-6 py-4">{alunos.email}</td>
                 <td className="px-6 py-4">{alunos.curso}</td>
                 <td className="flex py-4 gap-3 items-center">
-                  <Link to={`/editar/${alunos.id}`}>Editar</Link>
-                  <Link to={`/deletar/${alunos.id}`}>Deletar</Link>
+                  <button onClick={() => handleEditar(Number(alunos.id))}>Editar</button>
+                  <button onClick={() => handleDelete(Number(alunos.id))}>Deletar</button>
                 </td>
               </tr>
             ))}

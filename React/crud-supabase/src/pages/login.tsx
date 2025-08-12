@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../components/loading";
+import Cookies from "js-cookie";
 
 export const Login = () => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
   const Submit = async (data: any) => {
     try{
+      setLoading(true)
         const res = await fetch(
           `${import.meta.env.VITE_SUPABASE_AUTH}/token?grant_type=password`,
           {
@@ -21,8 +27,12 @@ export const Login = () => {
         console.log(res)
 
         if(res.ok){
+            Cookies.set("auth_user", import.meta.env.VITE_SUPABASE_API_KEY)
             navigate("/home")
+        }else{
+          toast("Email ou Senha Invalido")
         }
+        setLoading(false)
 
     }catch(err){
         console.log(err)
@@ -31,12 +41,14 @@ export const Login = () => {
   return (
     <>
       <section className="bg-gray-50 dark:bg-gray-900">
+        <ToastContainer/>
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                 Sign in to your account
               </h1>
+              {loading ? <Loading/> : null}
               <form
                 className="space-y-4 md:space-y-6"
                 onSubmit={handleSubmit(Submit)}
