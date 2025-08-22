@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpicTask</title>
+</head>
+
+<body>
+
+    <header class="navbar bg-base-200 shadow-sm mb-4">
+        <nav>
+            <ul class="flex gap-4">
+                <a class="btn btn-ghost text-xl">EpicTask</a>
+                <li><a href="/">Home</a></li>
+                <li><a href="/tasks">Tasks</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 place-items-center">
+
+        <div th:each="task : ${tasks}" class="card card-border bg-base-300 w-96">
+            <div th:text="${task.score + ' pts'}" class="badge badge-accent m-4"></div>
+            <div class="card-body items-center">
+                <h2 class="card-title" th:text="${task.title}"></h2>
+                <p th:text="${task.description}"></p>
+<div 
+    class="radial-progress bg-primary text-primary-content border-primary border-4" 
+th:style="'--value:' + ${task.status}"
+    aria-valuenow="${task.status}" 
+
+    role="progressbar"
+    th:text="${task.status + '%'}">
+</div>
+            </div>
+            <div class="card-actions justify-end m-4">
+                <button class="btn btn-error btn-soft">apagar</button>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
